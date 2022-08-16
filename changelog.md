@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Setup template
+- Setup template for plugin
+- Use version 0.2.0 of leto-modelizer-plugin-core
 
 [Unreleased]: https://github.com/ditrit/leto-modelizer-plugin-core/blob/main/changelog.md
