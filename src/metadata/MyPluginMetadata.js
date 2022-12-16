@@ -13,17 +13,19 @@ class MyPluginMetadata extends DefaultMetadata {
     return super.validate();
   }
 
-  /*
-   * Implement this to provide all the definitions describing the component.
-   *
-   * ComponentDefinition is used to generate the instantiable component list.
-   *
-   * And the componentAttributeDefinition is used to generate the form to update a component.
-   *
-   * Both of them can be also used to check components in parser and generate error.
-   */
-  getComponentDefinitions() {
-    return [];
+  parse() {
+    /*
+     * Implement this to provide all the definitions describing the components.
+     *
+     * ComponentDefinition is used to generate the instantiable component list.
+     *
+     * And the componentAttributeDefinition is used to generate the form to update a component.
+     *
+     * Both of them can be also used to check components in parser and generate errors.
+     */
+    this.pluginData.definitions = {
+      components: [],
+    };
   }
 }
 
