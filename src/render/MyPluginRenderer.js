@@ -1,16 +1,20 @@
-import { DefaultRender } from 'leto-module-client';
+import { DefaultRender } from 'leto-modelizer-plugin-core';
 
+/**
+ * Template of plugin renderer.
+ */
 class MyPluginRenderer extends DefaultRender {
-  /*
-   * The purpose of this function is to generate the content of one file.
-   *
-   * You have to map all the given components and links into a file content.
-   */
-  render(components = [], links = []) {
+  renderFiles() {
     /*
+     * The purpose of this function is to generate all files.
+     *
+     * You have to map all the given components into a file content and return all files.
+     *
      * Implement your own parse function here.
+     *
+     * Components can be find in `this.pluginData.components`.
      */
-    return '';
+    return []; // Return FileInput[].
   }
 }
 

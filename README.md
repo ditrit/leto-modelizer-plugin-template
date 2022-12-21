@@ -26,6 +26,8 @@ But before starting to develop your plugin you have to modify some properties of
 
 Don't forget to regenerate the `package-lock.json` with this command `npm i --package-lock-only`.
 
+Don't forget to modify the `jsdoc.config.js` to set your wanted plugin name and url.
+
 Don't forget to modify the `webpack.config.js` to set your wanted export file name.
 
 We provide a `changelog.json` to explain all change in the template, you can remove it and have your own changelog file.
@@ -41,6 +43,7 @@ So once your plugin's name is chosen, you have to make these modifications:
   * `src/metadata/MyPluginMetadata.js`
   * `src/parser/MyPluginParser.js`
   * `src/render/MyPluginRenderer.js`
+  * `src/models/MyPlugin.js`
 * Change the content of `src/index.js`
 
 Example: You want to name your plugin `Fruit`
@@ -56,21 +59,49 @@ export default FruitDrawer;
 
 Do the same thing for `MyPluginMetadata`, `MyPluginParse` and `MyPluginRenderer`.
 
+Content of `src/models/MyPlugin.js` becomes:
+```js
+import {
+  DefaultPlugin,
+  DefaultData,
+} from 'leto-modelizer-plugin-core';
+import FruitDrawer from 'src/draw/FruitDrawer';
+import FruitMetadata from 'src/metadata/FruitMetadata';
+import FruitParser from 'src/parser/FruitParser';
+import FruitRenderer from 'src/render/FruitRenderer';
+import { name, version } from 'package.json';
+
+/**
+ * My fruit plugin.
+ */
+class FruitPlugin extends DefaultPlugin {
+  /**
+   * Default constructor.
+   */
+  constructor() {
+    const pluginData = new DefaultData({
+      name,
+      version,
+    });
+
+    super({
+      pluginData,
+      pluginDrawer: new FruitDrawer(pluginData),
+      pluginMetadata: new FruitMetadata(pluginData),
+      pluginParser: new FruitParser(pluginData),
+      pluginRenderer: new FruitRenderer(pluginData),
+    });
+  }
+}
+
+export default FruitPlugin;
+```
+
 Content of `src/index.js` becomes:
 ```js
-import FruitDrawer from './draw/FruitDrawer';
-import FruitMetadata from './metadata/FruitMetadata';
-import FruitParser from './parser/FruitParser';
-import FruitRenderer from './render/FruitRenderer';
-import resources from './assets';
+import FruitPlugin from 'src/models/FruitPlugin';
 
-export default {
-  PluginDrawer: FruitDrawer,
-  PluginMetadata: FruitMetadata,
-  PluginParser: FruitParser,
-  PluginRenderer: FruitRenderer,
-  resources,
-};
+export default FruitPlugin;
 ```
 
 ## Write your metadata
@@ -79,7 +110,7 @@ To make your plugin work we need to have an array of [ComponentDefinitions](http
 
 The [DefaultMetadata](https://github.com/ditrit/leto-modelizer-plugin-core/blob/0.2.0/src/metadata/DefaultMetadata.js) provides two methods:
 * `validate` to validate the metadata
-* `getComponentDefinitions` to get all ComponentDefinitions from your provided metadata
+* `parse` to set all ComponentDefinitions in pluginData from your provided metadata
 
 To keep our previous example, we can have 4 ComponentDefinitions for our `FruitPlugin`:
 - `Bag`, it's a bag that can contains fruits. It has only one mandatory attribute, its `maxSize` that represent the maximum of fruit it can carry.
@@ -97,7 +128,7 @@ import {
 } from 'leto-modelizer-plugin-core';
 
 class FruitMetadata extends DefaultMetadata {
-  getComponentDefinitions() {
+  parse() {
     const bagDefinition = new ComponentDefinition('bag');
     bagDefinition.definedAttributes.push(new ComponentAttributeDefinition(
       'maxSize', // Attribute name
@@ -112,7 +143,8 @@ class FruitMetadata extends DefaultMetadata {
       'name',   // Attribute name
       'String', // Attribute type
     ));
-    return [bagDefinition, fruitDefinition];
+    
+    this.pluginData.definitions.components = [bagDefinition, fruitDefinition];
   }
 }
 
@@ -125,26 +157,15 @@ You have to implement you own parser to manage the file formats you want.
 
 `MyPluginParser` has only two methods to implement:
 - `isParsable(fileName): Boolean`, to indicate if the provided fileName has to be parsed.
-- `parse(definitions[], inputs[])`, to parse an array of file input and retrieve all the corresponding components.
+- `parse(inputs[])`, to parse an array of file input and retrieve all the corresponding components.
 
-The parse method provides:
-```json
-{
-  "components": [],
-  "links": [],
-  "errors": [],        
-}
-```
+The parse method updates the `this.pluginData.components` and `this.pluginData.parseErrors`.
 
-- `components` is an array of Component.
-- `links` is an array of ComponentLinks.
-- `errors` is an array of ParseError.
-- 
 You can use any library you want to parse all the files. For your information, we use [Antlr](https://www.antlr.org/) for our terraform parser.
 
 ### Manage the parser errors  
 
-On LetoModelizer we use Monaco editor and we design our ParseError class to make all errors usable by MonacoEditor.
+On LetoModelizer we use Monaco editor. We design our ParseError class to make all errors usable by MonacoEditor.
 
 So, when your parser throws|returns a parsing error, you should provide all errors positions. Leto-Modeliser has the ability to
 display correctly those errors in the monaco editor.
@@ -153,7 +174,7 @@ display correctly those errors in the monaco editor.
 
 You have to implement you own renderer to transform all components and links in your wanted files.
 
-Method to implements: `render(components: Components[], links: ComponentLink[])`
+Method to implements: `parse()`
 
 ## Customize your drawer models
 
@@ -166,60 +187,28 @@ But for model, if you want the drawer to set the default values on it, you have 
 - an attribute `x`: to set the default x position of your component.
 - an attribute `y`: to set the default y position of your component.
 - a class `.component-name`: to set the component name as text
-- a class `.component-type`: to set the component type as text 
-
-### Override default draw method for model
-
-You can override the method `drawDefaultModel` in `MyPluginDrawer` to manage the set of the data in the svg.
-
-D3 provides you with a data object that corresponding to one of your components for each component.
-
-So if you add specific display for a component attribute you can do this like that:
-
-```js
-drawDefaultModel(svgContainer) {
-  super.drawDefaultModel(svgContainer);
-  
-  svgContainer.select('YOUR_ATTRIBUT_SELECTOR') .text((data) => {
-    const wantedAttribute = data.attributes.find((attribute) => {
-      return attribute.name === 'YOUR_ATTRIBUT_NAME';
-    });
-    return wantedAttribute.value;
-  });
-}
-```
+- a class `.component-type`: to set the component type as text
 
 ### Use custom model in drawer
 
 You can provide multiple models and icons that can be used by the drawer.
 
-To do that, you have to add the svg of your icon in the folder `src/assets/icons` and the svg of your
-model in the folder `src/assets/models`.
+To do that, you have to add the svg of your icons in the folder `public/icons` and the svg of your
+models in the folder `public/models`.
 
 Take care of the model name, it will be used by the specific method called in drawer.
 
 Example:
 
-Add model `MyFruitModel.svg` in `src/assets/models/` and an icon `banana.svg` in `src/assets/icons`.
+Add a model `MyFruitModel.svg` in `public/models` and an icon `banana.svg` in `public/icons`.
 
 You have to set in one or more ComponentDefinition the property:
-- `svgTemplate` with the value `MyFruitModel`, to indicate to the drawer which model it has to use.
+- `model` with the value `MyFruitModel`, to indicate to the drawer which model it has to use.
 - `icon` with the value `banana`, to indicate to the drawer which icon it has to use. 
-
-And if you have a specific behavior for your model, you have to create a method `drawMyFruitModel`
-in the `MyPluginDrawer` class.
 
 ## Build your plugin
 
-Before building your plugin, your have to generate the resources of your plugin :
-
-```
-npm run build:resources
-```
-
-This command will generate a `src/assets/index.js` to export all the resources in your plugin.
-
-Once your resources are generated, you can build your plugin with this command:
+You can build your plugin with this command:
 
 ```
 npm run build
