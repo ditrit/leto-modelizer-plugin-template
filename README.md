@@ -6,7 +6,7 @@ You can find in all js objects in `src` an explanation of what you have to do.
 
 ## Update your package.json
 
-In `package.json` and in this project we provide you with many thing to start your plugin development:
+In `package.json` and in this project we provide you with many things to start your plugin development:
 - Setup jest for unit test.
 - Setup eslint with AirBnB syntax.
 - Setup the build command.
@@ -19,10 +19,10 @@ But before starting to develop your plugin you have to modify some properties of
 - `version`: we set the template version here, but you have to set your plugin version instead.
 - `description`: explain what your plugin does.
 - `repository`: update with your repository values.
-- `keywords`: Your keywords that describe your plugin.
+- `keywords`: your keywords that describe your plugin.
 - `author`: put the name and email of your maintainer for your plugin.
 - `bugs` / `homepage`: update with your repository url.
-- `main` / `exports`:  correspond to your build file that would be used by other
+- `main` / `exports`:  correspond to your build file that would be used by others
 
 Don't forget to regenerate the `package-lock.json` with this command `npm i --package-lock-only`.
 
@@ -30,7 +30,7 @@ Don't forget to modify the `jsdoc.config.js` to set your wanted plugin name and 
 
 Don't forget to modify the `webpack.config.js` to set your wanted export file name.
 
-We provide a `changelog.json` to explain all change in the template, you can remove it and have your own changelog file.
+We provide a `changelog.json` to explain all changes in the template, you can remove it and have your own changelog file.
 
 ## Name your plugin
 
@@ -113,10 +113,10 @@ The [DefaultMetadata](https://github.com/ditrit/leto-modelizer-plugin-core/blob/
 * `parse` to set all ComponentDefinitions in pluginData from your provided metadata
 
 To keep our previous example, we can have 4 ComponentDefinitions for our `FruitPlugin`:
-- `Bag`, it's a bag that can contains fruits. It has only one mandatory attribute, its `maxSize` that represent the maximum of fruit it can carry.
+- `Bag`, it's a bag that can contain fruits. It has only one mandatory attribute, its `maxSize` that represents the maximum of fruit it can carry.
 - `Fruit`, it's a simple fruit. Its only mandatory attribute is `name`.
 
-in this example, we don't want to parse and validate a metadata file.
+In this example, we don't want to parse and validate a metadata file.
 
 But you can find an implementation example [here](https://github.com/ditrit/iactor/tree/dev/src/metadata) which can validate and get definitions from [this metadata](https://github.com/ditrit/iactor/blob/dev/tests/metadata/aws.json).  
 
@@ -174,7 +174,7 @@ display correctly those errors in the monaco editor.
 
 You have to implement you own renderer to transform all components and links in your wanted files.
 
-Method to implements: `parse()`
+Method to implement: `parse()`
 
 ## Customize your drawer models
 
@@ -202,7 +202,7 @@ Example:
 
 Add a model `MyFruitModel.svg` in `public/models` and an icon `banana.svg` in `public/icons`.
 
-You have to set in one or more ComponentDefinition the property:
+You have to set in one or more ComponentDefinitions the property:
 - `model` with the value `MyFruitModel`, to indicate to the drawer which model it has to use.
 - `icon` with the value `banana`, to indicate to the drawer which icon it has to use. 
 
